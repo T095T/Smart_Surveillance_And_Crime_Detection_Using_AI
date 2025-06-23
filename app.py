@@ -329,8 +329,8 @@ def generate_frames(camera):
 import requests
 from datetime import datetime
 
-TELEGRAM_BOT_TOKEN = "7623141796:AAFr7D9cYjZWcEXp3FHXJzwnD5ZQ1QpDOgU"
-TELEGRAM_CHAT_ID = "7530603091"
+TELEGRAM_BOT_TOKEN = ""
+TELEGRAM_CHAT_ID = ""
 
 
 def send_telegram_photo(frame, caption=""):
