@@ -51,8 +51,7 @@ The CRIME System uses surveillance camera feeds to:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/rcime-system.git
-cd rcime-system
+git clone https://github.com/T095T/Smart_Surveillance_And_Crime_Detection_Using_AI.git
 
 # Set up Python 3.10 virtual environment
 python3.10 -m venv venv
@@ -63,3 +62,9 @@ pip install --no-deps -r flask-req.txt
 
 # Run the Flask application
 python app.py
+```
+---
+
+### System uses high resources, Requires GPU for processing.
+
+
