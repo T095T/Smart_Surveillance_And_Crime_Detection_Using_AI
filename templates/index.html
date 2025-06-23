@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Anomaly Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">Smart Survellieance and Crime Detection using AI </div>
+
+        <div class="content">
+            <div class="video-box">
+                <!-- Display live feed or uploaded video based on session -->
+                <img id="video-feed" src="" alt="Live Feed" style="width: 100%; height: 100%; ">
+                <div id="waiting-message" class="waiting-message">Waiting for source...</div>
+            </div>
+
+            <div class="details-box">
+                <p><strong>Status:</strong> Monitoring...</p>
+                
+
+                <!-- Form for selecting mode and uploading video -->
+                <form id="detection-form" method="POST" enctype="multipart/form-data">
+                    <div class="input-group">
+                        <label for="mode"><b>Select Mode: </b></label>
+                        <select id="mode" name="mode" onchange="toggleVideoUpload()">
+                            <option value="live" {% if video_mode == 'live' %}selected{% endif %}>Live Feed</option>
+                            <option value="video" {% if video_mode == 'video' %}selected{% endif %}>Video File</option>
+                        </select>
+                    </div>
+
+                    <!-- Video file upload input (only visible when 'video' mode is selected) -->
+                    <div class="input-group" id="video-upload" style="display: none;">
+                        <label for="videoFile">Upload Video:</label>
+                        <input type="file" name="videoFile" accept="video/*">
+                    </div>
+
+                    <button type="button" onclick="startDetection()">Start Detection</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="alert-box" style="display: none;">
+            Alert: No anomalies detected.
+        </div>
+    </div>
+
+    <!-- <script>
+        // Initialize the page by hiding the video upload field initially and making sure video doesn't load automatically
+        window.onload = function() {
+            // Reset the video feed to avoid automatic playing
+            document.getElementById('video-feed').src = '';  // Clear the video source initially
+            
+            toggleVideoUpload();
+        };
+    
+        function toggleVideoUpload() {
+            const mode = document.getElementById('mode').value;
+            const videoUpload = document.getElementById('video-upload');
+            if (mode === 'video') {
+                videoUpload.style.display = 'block';  // Show video file input
+            } else {
+                videoUpload.style.display = 'none';  // Hide video file input
+            }
+        }
+    
+        function startDetection() {
+
+
+    document.getElementById('video-feed').src = '';
+    const form = document.getElementById('detection-form');
+    // const mode = document.getElementById('mode').value;
+    const formData = new FormData(form);
+
+    fetch('/start', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            // Set the video feed image src to start loading stream in container
+            document.getElementById('video-feed').src = response.url;
+        }
+    })
+    .catch(error => {
+        console.error("Error starting detection:", error);
+    });
+}
+
+function fetchAlert() {
+    fetch('/get_alert')
+        .then(response => response.json())
+        .then(data => {
+            const alertBox = document.getElementById("alert-box");
+            const alertType = data.alert_message?.type;
+            const alertText = data.alert_message?.message;
+
+            if (alertText) {
+                alertBox.textContent = alertText;
+                alertBox.style.display = "block";
+
+                // Choose sound based on type
+                let soundId = "";
+                if (alertType === "violence") soundId = "sound-crime";
+                else if (alertType === "weapon") soundId = "sound-weapon";
+                else if (alertType === "criminal") soundId = "sound-criminal";
+                else if (alertType === "source") soundId = "sound-source";
+
+                const sound = document.getElementById(soundId);
+                if (sound) {
+                    sound.play().catch(err => {
+                        console.log("Sound play blocked until user interaction");
+                    });
+                }
+
+                setTimeout(() => {
+                    alertBox.style.display = "none";
+                }, 5000);
+            }
+        })
+        .catch(err => console.error("Alert fetch error:", err));
+}
+
+
+
+// Poll every 2 seconds
+setInterval(fetchAlert, 2000);
+
+
+
+    </script> -->
+    <script>
+        // Initialize the page by hiding the video upload field initially and making sure video doesn't load automatically
+        window.onload = function() {
+            // Reset the video feed to avoid automatic playing
+            document.getElementById('video-feed').src = '';  // Clear the video source initially
+            
+            toggleVideoUpload();
+            showWaitingMessage();  // Show the waiting message when the page loads
+        };
+    
+        function toggleVideoUpload() {
+            const mode = document.getElementById('mode').value;
+            const videoUpload = document.getElementById('video-upload');
+            if (mode === 'video') {
+                videoUpload.style.display = 'block';  // Show video file input
+            } else {
+                videoUpload.style.display = 'none';  // Hide video file input
+            }
+        }
+    
+        // Function to show waiting message
+        function showWaitingMessage() {
+            const videoFeed = document.getElementById('video-feed');
+            const waitingMessage = document.getElementById('waiting-message');
+            
+            // Show the waiting message and hide the video feed
+            waitingMessage.style.display = 'block';
+            videoFeed.style.display = 'none';
+        }
+    
+        // Function to hide the waiting message once the video feed is ready
+        function hideWaitingMessage() {
+            const waitingMessage = document.getElementById('waiting-message');
+            const videoFeed = document.getElementById('video-feed');
+            
+            // Hide the waiting message and show the video feed
+            waitingMessage.style.display = 'none';
+            videoFeed.style.display = 'block';
+        }
+    
+        // Start video stream detection (live or video file)
+        function startDetection() {
+            document.getElementById('video-feed').src = '';  // Clear any previous source
+            showWaitingMessage();  // Show waiting message while source is loading
+    
+            const form = document.getElementById('detection-form');
+            const formData = new FormData(form);
+    
+            fetch('/start', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    // Set the video feed image src to start loading the stream
+                    document.getElementById('video-feed').src = response.url;
+                    hideWaitingMessage();  // Hide waiting message once the feed is ready
+                }
+            })
+            .catch(error => {
+                console.error("Error starting detection:", error);
+                hideWaitingMessage();  // Hide waiting message in case of error
+            });
+        }
+    
+        // Fetch alerts (crime, weapon, criminal)
+        function fetchAlert() {
+            fetch('/get_alert')
+                .then(response => response.json())
+                .then(data => {
+                    const alertBox = document.getElementById("alert-box");
+                    const alertType = data.alert_message?.type;
+                    const alertText = data.alert_message?.message;
+    
+                    if (alertText) {
+                        alertBox.textContent = alertText;
+                        alertBox.style.display = "block";
+    
+                        // Choose sound based on type
+                        let soundId = "";
+                        if (alertType === "violence") soundId = "sound-crime";
+                        else if (alertType === "weapon") soundId = "sound-weapon";
+                        else if (alertType === "criminal") soundId = "sound-criminal";
+                        else if (alertType === "source") soundId = "sound-source";
+    
+                        const sound = document.getElementById(soundId);
+                        if (sound) {
+                            sound.play().catch(err => {
+                                console.log("Sound play blocked until user interaction");
+                            });
+                        }
+    
+                        setTimeout(() => {
+                            alertBox.style.display = "none";
+                        }, 5000);
+                    }
+                })
+                .catch(err => console.error("Alert fetch error:", err));
+        }
+    
+        // Poll every 2 seconds for alerts
+        setInterval(fetchAlert, 2000);
+    </script>
+    
+    <audio id="sound-crime" src="{{ url_for('static', filename='crime-sound.wav') }}" preload="auto"></audio>
+    <audio id="sound-criminal" src="{{ url_for('static', filename='bell.mp3') }}" preload="auto"></audio>
+    <audio id="sound-weapon" src="{{ url_for('static', filename='weapon-sound.wav') }}" preload="auto"></audio>
+    <audio id="sound-source" src="{{ url_for('static', filename='wsourced-switched.wav') }}" preload="auto"></audio>
+
+</body>
+</html>
